@@ -5,9 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # === KONFIGURACJA STRONY ===
-st.set_page_config(page_title="Generator Sygnałów v2.0", layout="wide")
-st.title("📡 Generator Sygnałów v2.0 (Zarządca Portfela)")
-st.write("Wybierz system z portfela. Parametry zostaną załadowane automatycznie.")
+st.set_page_config(page_title="Sygnały wybicia z kanału Donchiana", layout="wide")
+st.title("Generator wybić z kanału Donchiana ")
+st.write("Wybierz system. Parametry zostaną załadowane automatycznie.")
 
 # ==================================================
 #  Baza Danych "ZŁOTYCH PRZEPISÓW"
@@ -68,7 +68,7 @@ wybrany_system_nazwa = st.sidebar.selectbox(
 
 # Jeśli nic nie wybrano, zatrzymaj aplikację
 if wybrany_system_nazwa == "--- Wybierz system z portfela ---":
-    st.info("Wybierz system z panelu bocznego, aby wygenerować sygnał.")
+    st.info("Wybierz system z panelu bocznego, aby sprawdzić sygnał.")
     st.stop()
 
 # --- Automatyczne pobranie parametrów ---
@@ -87,12 +87,12 @@ except Exception as e:
     st.stop()
 
 # --- Pozostałe ustawienia w panelu bocznym ---
-st.sidebar.header("2. Wprowadź Kapitał")
-KAPITAL = st.sidebar.number_input("Twój Kapitał (Wartość Konta)", value=10000.0, step=100.0)
-RYZYKO_PROC = st.sidebar.number_input("Ryzyko na Transakcję (%)", value=4.0, step=0.5) / 100.0
+st.sidebar.header("2. Wprowadź kapitał")
+KAPITAL = st.sidebar.number_input("Twój kapitał (Wartość konta)", value=10000.0, step=100.0)
+RYZYKO_PROC = st.sidebar.number_input("Ryzyko na transakcję (%)", value=4.0, step=0.5) / 100.0
 
 # --- Wyświetlanie załadowanych parametrów ---
-st.sidebar.header("3. Aktywne Parametry")
+st.sidebar.header("3. Aktywne parametry")
 st.sidebar.success(f"Załadowano: {wybrany_system_nazwa}")
 st.sidebar.markdown(f"""
 * **Symbol:** `{SYMBOL}`
@@ -157,23 +157,23 @@ breakout_down = current_price < lower_band
 # 4. WYŚWIETLANIE WYNIKÓW
 # ==================================================
 
-st.info(f"Analiza dla dnia: **{last_date}** (Cena Zamknięcia: {current_price:.4f})")
+st.info(f"Analiza dla dnia: **{last_date}** (Cena zamknięcia: {current_price:.4f})")
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Aktualna Cena", f"{current_price:.4f}")
+col1.metric("Aktualna cena", f"{current_price:.4f}")
 col2.metric("Wartość ATR", f"{atr_value:.4f}")
-col3.metric("Filtr Trendu (EMA)", f"{ema_value:.4f}", delta="Wzrostowy" if trend_up else "Spadkowy")
+col3.metric("Filtr trendu (EMA)", f"{ema_value:.4f}", delta="Wzrostowy" if trend_up else "Spadkowy")
 col4.metric(f"Szczyt/Dołek ({IN_PERIOD}-dni)", f"{upper_band:.2f} / {lower_band:.2f}")
 
 st.divider()
 
-st.header("🚦 Sygnały Wejścia (Na jutro/dziś)")
+st.header("Sygnały wejścia")
 
 signal_found = False
 
 # Logika LONG
 if breakout_up and trend_up:
-    st.success(f"✅ **SYGNAŁ KUPNA (LONG)!** Cena przebiła szczyt {IN_PERIOD}-dniowy i jest nad EMA.")
+    st.success(f"**SYGNAŁ KUPNA (LONG)!** Cena przebiła szczyt {IN_PERIOD}-dniowy i jest nad EMA.")
     signal_found = True
     entry_price = current_price
     sl_price = entry_price - (M_SL * atr_value)
@@ -186,17 +186,17 @@ if breakout_up and trend_up:
         position_size = 0
     
     st.markdown(f"""
-    ### 📋 Plan Transakcji:
+    ### Plan Transakcji:
     * **Kierunek:** KUPNO (Long)
-    * **Cena Wejścia:** {entry_price:.4f} (Cena Market)
+    * **Cena wejścia:** {entry_price:.4f} (Cena Market)
     * **Stop Loss:** {sl_price:.4f} (Odległość: {M_SL} x ATR)
-    * **Sugerowany Wolumen:** **{position_size:.4f} lota**
+    * **Sugerowany wolumen:** **{position_size:.4f} lota**
     * *Ryzykowana kwota:* {cash_risk:.2f} (ok. {RYZYKO_PROC*100:.1f}%)
     """)
 
 # Logika SHORT
 elif breakout_down and trend_down:
-    st.error(f"🔻 **SYGNAŁ SPRZEDAŻY (SHORT)!** Cena przebiła dołek {IN_PERIOD}-dniowy i jest pod EMA.")
+    st.error(f"**SYGNAŁ SPRZEDAŻY (SHORT)!** Cena przebiła dołek {IN_PERIOD}-dniowy i jest pod EMA.")
     signal_found = True
     entry_price = current_price
     sl_price = entry_price + (M_SL * atr_value)
@@ -209,16 +209,16 @@ elif breakout_down and trend_down:
         position_size = 0
         
     st.markdown(f"""
-    ### 📋 Plan Transakcji:
+    ### Plan Transakcji:
     * **Kierunek:** SPRZEDAŻ (Short)
-    * **Cena Wejścia:** {entry_price:.4f} (Cena Market)
+    * **Cena wejścia:** {entry_price:.4f} (Cena Market)
     * **Stop Loss:** {sl_price:.4f} (Odległość: {M_SL} x ATR)
-    * **Sugerowany Wolumen:** **{position_size:.4f} lota**
+    * **Sugerowany wolumen:** **{position_size:.4f} lota**
     * *Ryzykowana kwota:* {cash_risk:.2f} (ok. {RYZYKO_PROC*100:.1f}%)
     """)
 
 else:
-    st.warning("✋ **BRAK NOWYCH SYGNAŁÓW WEJŚCIA.** Czekaj cierpliwie.")
+    st.warning("**BRAK NOWYCH SYGNAŁÓW WEJŚCIA.** Czekaj cierpliwie.")
     if trend_up:
         dist = (upper_band - current_price)
         st.caption(f"Jesteśmy w trendzie wzrostowym, ale brakuje wybicia. Do szczytu brakuje: {dist:.4f}")
@@ -229,7 +229,7 @@ else:
 st.divider()
 
 # --- SEKCJA C: ZARZĄDZANIE OTWARTĄ POZYCJĄ (Trailing Stop) ---
-st.header("🛡️ Zarządzanie Otwartą Pozycją (Sygnały Wyjścia)")
+st.header("Zarządzanie otwartą pozycją")
 st.write("Jeśli **JUŻ MASZ** otwartą pozycję, oto gdzie powinien znajdować się Twój Stop Loss na dziś:")
 
 highest_recent = df['high'].rolling(window=IN_PERIOD).max().iloc[-1]
@@ -241,20 +241,20 @@ tsl_short = lowest_recent + (K_TSL * atr_value)
 col_sl1, col_sl2 = st.columns(2)
 
 with col_sl1:
-    st.markdown("### Dla Pozycji DŁUGIEJ (Long)")
-    st.markdown(f"Teoretyczny Trailing SL powinien być na: **{tsl_long:.4f}**")
+    st.markdown("### Dla pozycji długiej (Long)")
+    st.markdown(f"Teoretyczny trailing SL powinien być na: **{tsl_long:.4f}**")
     st.caption(f"(Najwyższy szczyt {highest_recent:.4f} - {K_TSL}xATR)")
     
     if current_price < df.iloc[-1]['lowest_out']:
-        st.error(f"🚨 **SYGNAŁ WYJŚCIA (Kanał OUT)!** Cena spadła poniżej minimum z {OUT_PERIOD} dni ({df.iloc[-1]['lowest_out']:.4f}). Zamknij Longa.")
+        st.error(f"**SYGNAŁ WYJŚCIA (Kanał OUT)!** Cena spadła poniżej minimum z {OUT_PERIOD} dni ({df.iloc[-1]['lowest_out']:.4f}). Zamknij Longa.")
 
 with col_sl2:
-    st.markdown("### Dla Pozycji KRÓTKIEJ (Short)")
-    st.markdown(f"Teoretyczny Trailing SL powinien być na: **{tsl_short:.4f}**")
+    st.markdown("### Dla pozycji krótkiej (Short)")
+    st.markdown(f"Teoretyczny trailing SL powinien być na: **{tsl_short:.4f}**")
     st.caption(f"(Najniższy dołek {lowest_recent:.4f} + {K_TSL}xATR)")
 
     if current_price > df.iloc[-1]['highest_out']:
-        st.error(f"🚨 **SYGNAŁ WYJŚCIA (Kanał OUT)!** Cena wzrosła powyżej maksimum z {OUT_PERIOD} dni ({df.iloc[-1]['highest_out']:.4f}). Zamknij Shorta.")
+        st.error(f"**SYGNAŁ WYJŚCIA (Kanał OUT)!** Cena wzrosła powyżej maksimum z {OUT_PERIOD} dni ({df.iloc[-1]['highest_out']:.4f}). Zamknij Shorta.")
 
 # ==================================================
 # 5. WYKRES (Bez zmian)
@@ -273,5 +273,6 @@ ax.plot(df_plot.index, df_plot['lowest_in'], label=f'Min ({IN_PERIOD})', color='
 ax.set_title(f"{SYMBOL} - Analiza Techniczna")
 ax.legend()
 ax.grid(True, alpha=0.3)
+
 
 st.pyplot(fig)
