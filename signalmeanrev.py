@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 # === KONFIGURACJA STRONY ===
 st.set_page_config(page_title="Sygnały Mean Reversion", layout="wide")
-st.title("🧲 Generator Sygnałów: Mean Reversion (RAW)")
-st.write("Strategia kontrariańska oparta na SUROWYM RSI (bez wygładzania) i ATR.")
+st.title("Generator Sygnałów Mean Reversion")
+st.write("Strategia oparta na surowym RSI (bez wygładzania) i ATR")
 
 # ==================================================
 #  BAZA DANYCH "ZŁOTYCH PRZEPISÓW"
@@ -74,7 +74,7 @@ ZŁOTE_PRZEPISY = {
 # ==================================================
 # 1. PANEL BOCZNY
 # ==================================================
-st.sidebar.header("1. Wybierz System")
+st.sidebar.header("1. Wybierz system")
 wybrany_system = st.sidebar.selectbox("Wybierz z listy:", list(ZŁOTE_PRZEPISY.keys()))
 
 if wybrany_system == "--- Wybierz z listy ---":
@@ -86,9 +86,9 @@ st.sidebar.header("2. Konfiguracja")
 SYMBOL = st.sidebar.text_input("Symbol", value=defaults[0])
 KAPITAL = st.sidebar.number_input("Kapitał (Equity)", value=10000.0, step=100.0)
 RYZYKO_PROC = st.sidebar.number_input("Ryzyko (%)", value=4.0, step=0.5) / 100.0
-MULT = st.sidebar.number_input("Wartość 1 Punktu (mult)", value=defaults[1])
+MULT = st.sidebar.number_input("Wartość 1 punktu (mult)", value=defaults[1])
 
-st.sidebar.header("3. Parametry Strategii")
+st.sidebar.header("3. Parametry strategii")
 RSI_PERIOD = st.sidebar.number_input("Okres RSI", value=defaults[3])
 ATR_PERIOD = st.sidebar.number_input("Okres ATR", value=defaults[4])
 M_SL = st.sidebar.number_input("Mnożnik SL ('M')", value=defaults[5])
@@ -160,8 +160,8 @@ atr_val = last_bar['atr']
 st.info(f"Analiza dla dnia: **{last_date}** | Cena: **{current_price:.4f}**")
 
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("RSI (Surowe)", f"{rsi_val:.2f}", delta=f"{rsi_val - prev_bar['rsi']:.2f}")
-c2.metric("ATR (Surowe)", f"{atr_val:.4f}")
+c1.metric("RSI", f"{rsi_val:.2f}", delta=f"{rsi_val - prev_bar['rsi']:.2f}")
+c2.metric("ATR", f"{atr_val:.4f}")
 c3.metric("Long <", f"{RSI_L_ENT}")
 c4.metric("Short >", f"{RSI_S_ENT}")
 
@@ -172,7 +172,7 @@ signal_long = rsi_val < RSI_L_ENT
 signal_short = rsi_val > RSI_S_ENT
 
 if signal_long:
-    st.success("✅ **SYGNAŁ KUPNA (LONG)!** RSI spadło poniżej progu.")
+    st.success("**SYGNAŁ KUPNA (LONG)!** RSI przebiło podłogę.")
     
     sl_price = current_price - (M_SL * atr_val)
     risk_per_lot = (current_price - sl_price) * MULT
@@ -183,14 +183,14 @@ if signal_long:
         vol = risk_cash / risk_per_lot
         
     st.markdown(f"""
-    * **Sugerowany Wolumen:** `{vol:.4f} lota`
-    * **Cena Wejścia:** `{current_price:.4f}`
+    * **Sugerowany wolumen:** `{vol:.4f} lota`
+    * **Cena wejścia:** `{current_price:.4f}`
     * **Stop Loss:** `{sl_price:.4f}`
     * **Cel (TP):** Zamknij ręcznie, gdy RSI > **{RSI_L_EX}**.
     """)
 
 elif signal_short:
-    st.error("🔻 **SYGNAŁ SPRZEDAŻY (SHORT)!** RSI przebiło próg.")
+    st.error("**SYGNAŁ SPRZEDAŻY (SHORT)!** RSI przebiło sufit.")
     
     sl_price = current_price + (M_SL * atr_val)
     risk_per_lot = (sl_price - current_price) * MULT
@@ -201,14 +201,14 @@ elif signal_short:
         vol = risk_cash / risk_per_lot
         
     st.markdown(f"""
-    * **Sugerowany Wolumen:** `{vol:.4f} lota`
-    * **Cena Wejścia:** `{current_price:.4f}`
+    * **Sugerowany wolumen:** `{vol:.4f} lota`
+    * **Cena wejścia:** `{current_price:.4f}`
     * **Stop Loss:** `{sl_price:.4f}`
     * **Cel (TP):** Zamknij ręcznie, gdy RSI < **{RSI_S_EX}**.
     """)
 
 else:
-    st.warning("✋ **BRAK SYGNAŁÓW.**")
+    st.warning("**BRAK SYGNAŁÓW.**")
     if rsi_val < 50:
         st.caption(f"Do Longa brakuje spadku RSI o: {rsi_val - RSI_L_ENT:.2f} pkt.")
     else:
@@ -217,15 +217,15 @@ else:
 st.divider()
 
 # ZARZĄDZANIE
-st.header("🛡️ Zarządzanie (Wyjścia)")
+st.header("Zarządzanie (Wyjścia)")
 c_l, c_s = st.columns(2)
 with c_l:
     st.markdown("**Masz LONGA?**")
-    if rsi_val > RSI_L_EX: st.success(f"💰 **ZAMKNIJ!** RSI ({rsi_val:.2f}) > {RSI_L_EX}")
+    if rsi_val > RSI_L_EX: st.success(f"**ZAMKNIJ!** RSI ({rsi_val:.2f}) > {RSI_L_EX}")
     else: st.info("Trzymaj.")
 with c_s:
     st.markdown("**Masz SHORTA?**")
-    if rsi_val < RSI_S_EX: st.success(f"💰 **ZAMKNIJ!** RSI ({rsi_val:.2f}) < {RSI_S_EX}")
+    if rsi_val < RSI_S_EX: st.success(f"**ZAMKNIJ!** RSI ({rsi_val:.2f}) < {RSI_S_EX}")
     else: st.info("Trzymaj.")
 
 # WYKRES
@@ -245,5 +245,6 @@ ax2.axhline(RSI_S_EX, color='orange', linestyle=':')
 ax2.set_ylim(0, 100)
 ax2.grid(True, alpha=0.3)
 ax2.legend(["RSI", "L Ent", "S Ent", "L Ex", "S Ex"], loc='upper left', fontsize='small')
+
 
 st.pyplot(fig)
